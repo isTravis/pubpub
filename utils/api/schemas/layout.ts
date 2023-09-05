@@ -1,21 +1,12 @@
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@anatine/zod-openapi';
-import { MaybeHas, docJsonSchema } from 'types';
+import * as types from 'types';
 import { generateHash } from 'utils/hashes';
-import {
-	LayoutBlock,
-	LayoutBlockBanner,
-	LayoutBlockCollectionHeader,
-	LayoutBlockCollectionsPages,
-	LayoutBlockHtml,
-	LayoutBlockPubs,
-	LayoutBlockSubmissionBanner,
-	LayoutBlockText,
-	pubPreviewTypes,
-	pubSortOrders,
-	textAligns,
-} from './types';
+import { docJsonSchema } from './release';
 
+export const textAligns = ['left', 'center'] as const;
+
+export const pubPreviewTypes = ['minimal', 'small', 'medium', 'large'] as const;
 extendZodWithOpenApi(z);
 
 export const layoutBlockBannerSchema = z
@@ -37,7 +28,7 @@ export const layoutBlockBannerSchema = z
 	})
 	.openapi({
 		title: 'Banner block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockBanner, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockBanner, 'id'>>;
 
 export const layoutBlockCollectionPagesSchema = z
 	.object({
@@ -56,7 +47,7 @@ export const layoutBlockCollectionPagesSchema = z
 	})
 	.openapi({
 		title: 'Collection/pages block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockCollectionsPages, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockCollectionsPages, 'id'>>;
 
 export const layoutBlockHtmlSchema = z
 	.object({
@@ -68,7 +59,15 @@ export const layoutBlockHtmlSchema = z
 	})
 	.openapi({
 		title: 'HTML block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockHtml, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockHtml, 'id'>>;
+
+export const pubSortOrders = [
+	'creation-date',
+	'creation-date-reversed',
+	'publish-date',
+	'publish-date-reversed',
+	'collection-rank',
+] as const;
 
 export const layoutBlockPubsSchema = z
 	.object({
@@ -90,7 +89,7 @@ export const layoutBlockPubsSchema = z
 	})
 	.openapi({
 		title: 'Pubs block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockPubs, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockPubs, 'id'>>;
 
 export const layoutBlockTextSchema = z
 	.object({
@@ -103,7 +102,7 @@ export const layoutBlockTextSchema = z
 	})
 	.openapi({
 		title: 'Text block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockText, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockText, 'id'>>;
 
 export const layoutBlockCollectionHeaderSchema = z
 	.object({
@@ -120,12 +119,12 @@ export const layoutBlockCollectionHeaderSchema = z
 	})
 	.openapi({
 		title: 'Collection header block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockCollectionHeader, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockCollectionHeader, 'id'>>;
 
 export const layoutBlockSubmissionBannerSchema = z
 	.object({
 		type: z.literal('submission-banner'),
-		id: z.string().default(generateHash(8)).default(generateHash(8)),
+		id: z.string().default(generateHash(8)),
 		content: z.object({
 			title: z.string(),
 			body: docJsonSchema,
@@ -134,7 +133,7 @@ export const layoutBlockSubmissionBannerSchema = z
 	})
 	.openapi({
 		title: 'Submission banner block',
-	}) satisfies z.ZodType<MaybeHas<LayoutBlockSubmissionBanner, 'id'>>;
+	}) satisfies z.ZodType<types.MaybeHas<types.LayoutBlockSubmissionBanner, 'id'>>;
 
 export const layoutBlockSchema = z.discriminatedUnion('type', [
 	layoutBlockBannerSchema,
@@ -144,4 +143,4 @@ export const layoutBlockSchema = z.discriminatedUnion('type', [
 	layoutBlockTextSchema,
 	layoutBlockCollectionHeaderSchema,
 	layoutBlockSubmissionBannerSchema,
-]) satisfies z.ZodType<MaybeHas<LayoutBlock, 'id'>>;
+]) satisfies z.ZodType<types.MaybeHas<types.LayoutBlock, 'id'>>;

@@ -1,4 +1,4 @@
-import * as types from 'types';
+// import * as types from 'types';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@anatine/zod-openapi';
 
@@ -10,7 +10,7 @@ export const collectionPubSchema = z.object({
 	contextHint: z.string().nullable(),
 	rank: z.string(),
 	pubRank: z.string(),
-}) satisfies z.ZodType<types.CollectionPub>;
+}); // satisfies z.ZodType<types.CollectionPub>;
 
 export const updateCollectionPubSchema = collectionPubSchema
 	.omit({ id: true })

@@ -41,6 +41,7 @@ const facetSchemas = Object.entries(ALL_FACET_DEFINITIONS).reduce((acc, [njame, 
 }, {} as FacetSchema);
 
 export const facetSchema = z.object({
+	// facets: z.any(),
 	facets: z.object(facetSchemas).partial() satisfies z.ZodType<UpdateFacetsQuery>,
 	scope: z.object({
 		kind: z.enum(['community', 'collection', 'pub']),

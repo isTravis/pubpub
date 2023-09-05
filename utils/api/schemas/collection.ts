@@ -1,7 +1,7 @@
 import * as types from 'types';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@anatine/zod-openapi';
-import { layoutBlockSchema } from 'utils/layout';
+import { layoutBlockSchema } from './layout';
 
 extendZodWithOpenApi(z);
 
@@ -9,6 +9,9 @@ const collectionLayoutSchema = z.object({
 	isNarrow: z.boolean().optional(),
 	blocks: z.array(layoutBlockSchema),
 });
+
+export const collectionKinds = ['tag', 'issue', 'book', 'conference'] as const;
+export const readNextPreviewSizes = ['none', 'minimal', 'medium', 'choose-best'] as const;
 
 export const collectionSchema = z.object({
 	id: z.string().uuid(),
@@ -26,9 +29,9 @@ export const collectionSchema = z.object({
 	viewHash: z.string().nullable(),
 	editHash: z.string().nullable(),
 	metadata: z.record(z.any()).nullable(),
-	kind: z.enum(types.collectionKinds).nullable(),
+	kind: z.enum(collectionKinds).nullable(),
 	doi: z.string().nullable(),
-	readNextPreviewSize: z.enum(types.readNextPreviewSizes).default('choose-best'),
+	readNextPreviewSize: z.enum(readNextPreviewSizes).default('choose-best'),
 	layout: collectionLayoutSchema,
 	layoutAllowsDuplicatePubs: z.boolean().default(false),
 	pageId: z.string().uuid().nullable(),

@@ -15,8 +15,7 @@ import {
 } from 'sequelize-typescript';
 import type { InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import type { SerializedModel } from 'types';
-import { CommunityHeaderLink, CommunityHeroButton } from 'types';
-import { CommunityNavigationEntry } from 'client/utils/navigation';
+import { CommunityHeaderLink, CommunityHeroButton, CommunityNavigationEntry } from 'types';
 import {
 	Organization,
 	Collection,

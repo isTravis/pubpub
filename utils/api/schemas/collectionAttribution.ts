@@ -1,7 +1,7 @@
-import * as types from 'types';
+// import * as types from 'types';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@anatine/zod-openapi';
-import { CollectionAttribution } from 'server/models';
+// import { CollectionAttribution } from 'server/models';
 import {
 	attributionCreationSchema,
 	attributionSchema,
@@ -12,7 +12,7 @@ extendZodWithOpenApi(z);
 
 export const collectionAttributionSchema = attributionSchema.extend({
 	collectionId: z.string().uuid(),
-}) satisfies z.ZodType<types.CollectionAttribution>;
+}); // satisfies z.ZodType<types.CollectionAttribution>;
 
 export const collectionAttributionCreationSchema = z
 	.object({
@@ -23,7 +23,7 @@ export const collectionAttributionCreationSchema = z
 
 export const collectionAttributionUpdateSchema = updateAttributionSchema.merge(
 	z.object({ collectionId: z.string().uuid(), communityId: z.string().uuid() }),
-) satisfies z.ZodType<types.UpdateParams<CollectionAttribution>>;
+); // satisfies z.ZodType<types.UpdateParams<CollectionAttribution>>;
 
 export const collectionAttributionRemoveSchema = z.object({
 	id: z.string().openapi({ description: 'The attribution id' }),

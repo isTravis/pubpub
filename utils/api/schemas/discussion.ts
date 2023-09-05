@@ -1,4 +1,4 @@
-import * as types from 'types';
+// import * as types from 'types';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@anatine/zod-openapi';
 
@@ -16,4 +16,4 @@ export const discussionSchema = z.object({
 	anchorId: z.string().uuid().nullable(),
 	pubId: z.string().uuid().nullable(),
 	commenterId: z.string().uuid().nullable(),
-}) satisfies z.ZodType<types.Discussion>;
+}); // satisfies z.ZodType<types.Discussion>;

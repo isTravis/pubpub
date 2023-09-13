@@ -61,8 +61,8 @@ module.exports = {
 					resolve(__dirname, '../../types'),
 					resolve(__dirname, '../../facets'),
 				],
-				loader: 'ts-loader',
-				options: { configFile: resolve(__dirname, '../../tsconfig.client.json') },
+				loader: 'esbuild-loader',
+				options: { tsconfig: resolve(__dirname, '../../tsconfig.client.json') },
 			},
 			{
 				test: /\.scss$/,

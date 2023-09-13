@@ -40,11 +40,11 @@ export type ActivityItemOfKind<Kind extends ActivityItemKind> = ActivityItem<
 >;
 
 export {
-	ActivityAssociationIds,
-	ActivityAssociations,
-	ActivityAssociationType,
+	type ActivityAssociationIds,
+	type ActivityAssociations,
+	type ActivityAssociationType,
 	activityAssociationTypes,
-	ActivityAssociationModels,
+	type ActivityAssociationModels,
 } from './associations';
 
 export type ActivityItemsFetchResult = {

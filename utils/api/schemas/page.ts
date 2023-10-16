@@ -35,10 +35,18 @@ export const pageCreateSchema = pageSchema
 		slug: true,
 		description: true,
 		avatar: true,
+		isPublic: true,
+		isNarrowWidth: true,
+		layout: true,
+		layoutAllowsDuplicatePubs: true,
 	})
 	.partial({
 		description: true,
 		avatar: true,
+		isPublic: true,
+		isNarrowWidth: true,
+		layout: true,
+		layoutAllowsDuplicatePubs: true,
 	});
 
 export const pageUpdateSchema = pageSchema

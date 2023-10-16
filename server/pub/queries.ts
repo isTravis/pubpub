@@ -30,6 +30,7 @@ export const createPub = async (
 		collectionIds,
 		slug,
 		titleKind = 'Untitled Pub',
+		title,
 		...restArgs
 	}: { communityId: string; collectionIds?: string[] | null; slug?: string; [key: string]: any },
 	actorId?: string,
@@ -41,20 +42,30 @@ export const createPub = async (
 	);
 	const draft = await createDraft();
 
-	const newPub = await Pub.create(
-		{
-			title: `${titleKind} on ${dateString}`,
-			slug: newPubSlug,
-			communityId,
-			viewHash: generateHash(8),
-			editHash: generateHash(8),
-			reviewHash: generateHash(8),
-			commentHash: generateHash(8),
-			draftId: draft.id,
-			...restArgs,
-		},
-		{ actorId },
-	);
+	let newPub: Pub;
+	try {
+		newPub = await Pub.create(
+			{
+				title: title ?? `${titleKind} on ${dateString}`,
+				slug: newPubSlug,
+				communityId,
+				viewHash: generateHash(8),
+				editHash: generateHash(8),
+				reviewHash: generateHash(8),
+				commentHash: generateHash(8),
+				draftId: draft.id,
+				...restArgs,
+			},
+			{ actorId },
+		);
+	} catch (e: any) {
+		e.errors.forEach((error: any) => {
+			if (error.type === 'unique violation') {
+				throw new Error('Slug is already in use');
+			}
+		});
+		throw new Error(e);
+	}
 
 	const createPubAttribution =
 		actorId &&

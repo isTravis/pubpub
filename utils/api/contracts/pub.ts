@@ -5,7 +5,7 @@ import { extendZodWithOpenApi } from '@anatine/zod-openapi';
 import { resourceSchema } from '../schemas/resource';
 import {
 	getManyQuerySchema,
-	pubPostSchema,
+	pubCreateSchema,
 	pubPutSchema,
 	pubSchema,
 	resourceASTSchema,
@@ -22,7 +22,7 @@ export const pubContract = c.router({
 		method: 'POST',
 		summary: 'Create a Pub',
 		description: 'Create a Pub',
-		body: pubPostSchema,
+		body: pubCreateSchema,
 		responses: {
 			201: pubSchema,
 		},

@@ -85,10 +85,21 @@ export const pubSchema = z.object({
 	crossrefDepositRecordId: z.string().uuid().nullable(),
 }) satisfies z.ZodType<types.Pub>;
 
-export const pubPostSchema = z
-	.object({
-		communityId: z.string(),
+export const pubCreateSchema = pubSchema
+	.pick({
+		communityId: true,
+		slug: true,
+		title: true,
+		avatar: true,
+		description: true,
+		htmlTitle: true,
+		htmlDescription: true,
+		doi: true,
+		customPublishedAt: true,
+		downloads: true,
 	})
+	.partial()
+	.required({ communityId: true })
 	.and(
 		z.union([
 			z.object({

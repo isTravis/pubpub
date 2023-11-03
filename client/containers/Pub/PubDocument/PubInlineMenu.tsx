@@ -1,14 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import uuidv4 from 'uuid/v4';
 import { Button, Classes } from '@blueprintjs/core';
 
 import { pubUrl } from 'utils/canonicalUrls';
 import { usePageContext } from 'utils/hooks';
 import { Icon, ClickToCopyButton } from 'components';
-import { FormattingBar, buttons } from 'components/FormattingBar';
+import { FormattingBar, FormattingBarSuggestedEdits, buttons } from 'components/FormattingBar';
 import { setLocalHighlight, moveToEndOfSelection, isDescendantOf } from 'components/Editor';
-import { acceptSuggestedEdits } from 'components/Editor/plugins/suggestedEdits/resolve';
+import { getResolvableRangeForSelection } from 'components/Editor/plugins/suggestedEdits/resolve';
 
+import { getSuggestionAttrsForNode } from 'client/components/Editor/plugins/suggestedEdits/operations';
+import { SuggestedEditsUser } from 'types';
+import { apiFetch } from 'client/utils/apiFetch';
 import { usePubContext } from '../pubHooks';
 
 require('./pubInlineMenu.scss');
@@ -23,22 +26,50 @@ const PubInlineMenu = () => {
 	const { pubData, collabData, historyData, pubBodyState } = usePubContext();
 	const { communityData, scopeData } = usePageContext();
 	const { canView, canCreateDiscussions } = scopeData.activePermissions;
+	const [suggestionAuthor, setSuggestionAuthor] = useState<SuggestedEditsUser>();
 	const selection = collabData.editorChangeObject!.selection;
+	const [selectedSuggestion, suggestionRange] = useMemo(() => {
+		if (collabData.editorChangeObject && collabData.editorChangeObject.view) {
+			const doc = collabData.editorChangeObject.view.state.doc;
+			const range = getResolvableRangeForSelection(collabData.editorChangeObject.view.state);
+			if (range) {
+				const node = doc.nodeAt(range.from);
+				const attrs = node && getSuggestionAttrsForNode(node);
+				return [attrs, range];
+			}
+		}
+		return [null, null];
+	}, [collabData.editorChangeObject]);
 	const shouldHide = useMemo(() => {
 		if (!collabData.editorChangeObject || !collabData.editorChangeObject.view || !selection)
 			return true;
-		const state = collabData.editorChangeObject.view.state;
-		const inRange = acceptSuggestedEdits(state);
-
 		return (
-			inRange ||
-			!selection ||
-			selection.empty ||
-			(selection as any).$anchorCell ||
-			collabData.editorChangeObject!.selectedNode ||
-			isDescendantOf('code_block', collabData.editorChangeObject!.selection)
+			!selectedSuggestion &&
+			(!selection ||
+				selection.empty ||
+				(selection as any).$anchorCell ||
+				collabData.editorChangeObject!.selectedNode ||
+				isDescendantOf('code_block', collabData.editorChangeObject!.selection))
 		);
-	}, [collabData.editorChangeObject, selection]);
+	}, [collabData.editorChangeObject, selectedSuggestion, selection]);
+
+	const fetchSuggestionAuthor = useCallback(async () => {
+		if (selectedSuggestion) {
+			const suggestionUser: SuggestedEditsUser = await apiFetch.get(
+				`/api/users?suggestionUserId=${encodeURIComponent(
+					selectedSuggestion.suggestionUserId,
+				)}`,
+			);
+			if (suggestionUser) {
+				setSuggestionAuthor(suggestionUser);
+			}
+		}
+	}, [selectedSuggestion]);
+
+	useEffect(() => {
+		fetchSuggestionAuthor();
+	}, [fetchSuggestionAuthor]);
+
 	const selectionBoundingBox: Record<string, any> =
 		collabData.editorChangeObject!.selectionBoundingBox || {};
 
@@ -70,7 +101,15 @@ const PubInlineMenu = () => {
 			className={`pub-inline-menu-component ${Classes.ELEVATION_2}`}
 			style={{ position: 'absolute', top: topPosition, left: selectionBoundingBox.left }}
 		>
-			{renderFormattingBar()}
+			{selectedSuggestion ? (
+				<FormattingBarSuggestedEdits
+					suggestionAuthor={suggestionAuthor}
+					buttons={buttons.suggestedEditsButtonSet}
+					editorChangeObject={collabData.editorChangeObject || ({} as any)}
+				/>
+			) : (
+				renderFormattingBar()
+			)}
 			{(canView || canCreateDiscussions) && pubBodyState.canCreateAnchoredDiscussions && (
 				<Button
 					aria-label="Start a discussion"
@@ -79,7 +118,12 @@ const PubInlineMenu = () => {
 					icon={<Icon icon="chat" />}
 					onClick={() => {
 						const view = collabData.editorChangeObject!.view;
-						setLocalHighlight(view, selection.from, selection.to, uuidv4());
+						setLocalHighlight(
+							view,
+							suggestionRange?.from ?? selection.from,
+							suggestionRange?.to ?? selection.to,
+							uuidv4(),
+						);
 						moveToEndOfSelection(collabData.editorChangeObject!.view);
 					}}
 				/>

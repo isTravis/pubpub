@@ -43,6 +43,7 @@ const FormattingBarSuggestedEdits = (props: Props) => {
 				<Button
 					ref={buttonElementRefs.getRef(suggestedEditsAccept.key)}
 					aria-label={suggestedEditsAccept.title}
+					minimal={true}
 					role="button"
 					onClick={() => handleClick(suggestedEditsAccept)}
 					className="accept-button"
@@ -54,6 +55,7 @@ const FormattingBarSuggestedEdits = (props: Props) => {
 				<Button
 					ref={buttonElementRefs.getRef(suggestedEditsReject.key)}
 					aria-label={suggestedEditsReject.title}
+					minimal={true}
 					role="button"
 					onClick={() => handleClick(suggestedEditsReject)}
 					className="reject-button"

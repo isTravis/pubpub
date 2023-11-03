@@ -18,7 +18,6 @@ import PubFileImport from './PubFileImport';
 import PubHeaderFormatting from './PubHeaderFormatting';
 import PubHistoricalNotice from './PubHistoricalNotice';
 import PubInlineMenu from './PubInlineMenu';
-import PubInlineSuggestedEdits from './PubInlineSuggestedEdits';
 import PubLinkController from './PubLinkController';
 import PubMaintenanceNotice from './PubMaintenanceNotice';
 
@@ -34,7 +33,7 @@ const PubDocument = () => {
 		pubBodyState: { isReadOnly, hidePubBody },
 	} = usePubContext();
 	const { isViewingHistory } = historyData;
-	const { communityData, scopeData, featureFlags } = usePageContext();
+	const { communityData, scopeData } = usePageContext();
 	const pubEdgeDisplay = useFacetsQuery((F) => F.PubEdgeDisplay);
 	const { canEdit, canEditDraft } = scopeData.activePermissions;
 	const { isReviewingPub } = pubData;
@@ -81,9 +80,6 @@ const PubDocument = () => {
 						/>
 					)}
 					{!isViewingHistory && <PubInlineMenu />}
-					{featureFlags.suggestedEdits && !isViewingHistory && (
-						<PubInlineSuggestedEdits />
-					)}
 					<PubEdgeListing
 						className="bottom-pub-edges"
 						pubData={pubData}

@@ -6,7 +6,15 @@ extendZodWithOpenApi(z);
 
 const c = initContract();
 
+const md = String.raw;
+
 export const workerTaskContract = c.router({
+	/**
+	 * summary: 'Get a worker task'
+	 *
+	 * @description
+	 * 'Get the status of a worker task. This is used to poll for the status of a worker task, such as an import or export.'
+	 */
 	get: {
 		path: '/api/workerTasks',
 		method: 'GET',
@@ -26,6 +34,28 @@ export const workerTaskContract = c.router({
 			404: z.object({
 				error: z.literal('WorkerTask not found'),
 			}),
+		},
+		metadata: {
+			example: md`
+				# hey
+
+				-   hey
+				-   ho
+
+				## h
+
+				~~~ts
+				function go() {}
+				hello;
+				~~~
+
+				    const x = 'hey';
+				    function gamed({ hey }) {}
+
+
+
+
+			`,
 		},
 	},
 });

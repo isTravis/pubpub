@@ -18,6 +18,13 @@ extendZodWithOpenApi(z);
 const c = initContract();
 
 export const collectionContract = c.router({
+	/**
+	 * summary: "Get a collection by it's id or slug"
+	 *
+	 * @description
+	 * "Get a collection by it's id or slug"
+	 */
+
 	get: {
 		path: '/api/collections/:slugOrId',
 		method: 'GET',

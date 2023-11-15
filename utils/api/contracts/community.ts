@@ -13,8 +13,12 @@ const c = initContract();
 
 export const communityContract = c.router({
 	/**
-	 * Get a list of communities. Currently only returns the current community.
+	 * summary: 'Get the current community'
+	 *
+	 * @description
+	 * 'Get a list of communities. Currently only returns the current community.'
 	 */
+
 	getCommunities: {
 		path: '/api/communities',
 		method: 'GET',

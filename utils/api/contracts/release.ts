@@ -8,6 +8,13 @@ extendZodWithOpenApi(z);
 const c = initContract();
 
 export const releaseContract = c.router({
+	/**
+	 * summary: 'Create a release'
+	 *
+	 * @description
+	 * 'Create a release'
+	 */
+
 	create: {
 		path: '/api/releases',
 		method: 'POST',

@@ -24,6 +24,13 @@ export const pubAttributionWithRelationsSchema = pubAttributionSchema.extend({
 });
 
 export const pubAttributionContract = c.router({
+	/**
+	 * summary: 'Get a pub attribution'
+	 *
+	 * @description
+	 * 'Get a pub attribution'
+	 */
+
 	get: {
 		path: '/api/pubAttributions/:id',
 		method: 'GET',

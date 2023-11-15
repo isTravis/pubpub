@@ -9,6 +9,13 @@ extendZodWithOpenApi(z);
 const c = initContract();
 
 export const pubEdgeContract = c.router({
+	/**
+	 * summary: 'Get a pubEdge'
+	 *
+	 * @description
+	 * 'Get a pubEdge by id'
+	 */
+
 	get: {
 		path: '/api/pubEdges/:id',
 		method: 'GET',

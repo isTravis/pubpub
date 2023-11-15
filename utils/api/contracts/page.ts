@@ -15,6 +15,13 @@ extendZodWithOpenApi(z);
 const c = initContract();
 
 export const pageContract = c.router({
+	/**
+	 * summary: "Get a page by it's slug or id"
+	 *
+	 * @description
+	 * "Get a page by it's slug or id."
+	 */
+
 	get: {
 		path: '/api/pages/:slugOrId',
 		method: 'GET',

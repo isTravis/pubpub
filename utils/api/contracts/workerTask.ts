@@ -15,6 +15,7 @@ export const workerTaskContract = c.router({
 	 * @description
 	 * 'Get the status of a worker task. This is used to poll for the status of a worker task, such as an import or export.'
 	 */
+
 	get: {
 		path: '/api/workerTasks',
 		method: 'GET',
@@ -37,20 +38,27 @@ export const workerTaskContract = c.router({
 		},
 		metadata: {
 			example: md`
-				# hey
+				    			    			    			    			# hey
 
-				-   hey
-				-   ho
+				    			    			    			    			-   hey
+				    			    			    			    			-   ho
 
-				## h
+				    			    			    			    			## h
 
-				~~~ts
-				function go() {}
-				hello;
-				~~~
+				    			    			    			    			~~~ts
+				    			    			    			    			function go() {}
+				    			    			    			    			hello;
+				    			    			    			    			~~~
 
-				    const x = 'hey';
-				    function gamed({ hey }) {}
+				    			    			    			    			    const x = 'hey';
+				    			    			    			    			    function gamed({ hey }) {}
+
+
+
+
+
+
+
 
 
 

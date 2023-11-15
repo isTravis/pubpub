@@ -24,6 +24,13 @@ export const collectionAttributionWithRelationsSchema = collectionAttributionSch
 
 export const collectionAttributionContract = c.router(
 	{
+		/**
+		 * summary: 'Get a collection attribution'
+		 *
+		 * @description
+		 * 'Get a collection attribution'
+		 */
+
 		get: {
 			path: '/api/collectionAttributions/:id',
 			method: 'GET',

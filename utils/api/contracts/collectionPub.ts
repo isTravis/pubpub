@@ -13,6 +13,13 @@ extendZodWithOpenApi(z);
 const c = initContract();
 
 export const collectionPubContract = c.router({
+	/**
+	 * summary: 'Get the pubs associated with a collection'
+	 *
+	 * @description
+	 * 'Get the pubs associated with a collection'
+	 */
+
 	get: {
 		path: '/api/collectionPubs',
 		method: 'GET',

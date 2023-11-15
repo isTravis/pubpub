@@ -5,5 +5,5 @@
 	"tabWidth": 4,
 	"trailingComma": "all",
 	"useTabs": true,
-	"rlugins": ["prettier-plugin-embed"]
+	"plugins": ["prettier-plugin-embed"]
 }

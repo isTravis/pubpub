@@ -15,52 +15,57 @@ function updateJSDocComments(dir: string, template) {
 		tsConfigFilePath: 'tsconfig.json',
 	});
 
-	const sourceFiles = project.getSourceFiles(dir);
+	const sourceFiles = project.getSourceFiles(`${dir}/pub.ts`);
 
 	sourceFiles.forEach((sourceFile) => {
 		sourceFile.forEachDescendant((node) => {
-			if (node.getKind() === SyntaxKind.PropertyAssignment) {
-				const propertyAssignment = node.asKind(SyntaxKind.PropertyAssignment);
-				const initializer = propertyAssignment?.getInitializerIfKind(
-					SyntaxKind.ObjectLiteralExpression,
-				);
+			if (ts.isObjectLiteralExpression(node.compilerNode)) {
+				const objL = node.asKind(SyntaxKind.ObjectLiteralExpression);
+				objL?.getProperties().forEach((prop) => {
+					if (prop.getKind() === SyntaxKind.PropertyAssignment) {
+						const propertyAssignment = prop.asKind(SyntaxKind.PropertyAssignment);
+						const initializer = propertyAssignment?.getInitializerIfKind(
+							SyntaxKind.ObjectLiteralExpression,
+						);
 
-				if (initializer && initializer.getProperty('path')) {
-					const summary = initializer.getProperty('summary')?.getText();
-					const description = initializer
-						.getProperty('description')
-						?.getChildAtIndex(2)
-						?.getText();
-					// Check for existing JSDoc comments
-					const comments = propertyAssignment.getLeadingCommentRanges();
+						if (initializer && initializer.getProperty('path')) {
+							const summary = initializer.getProperty('summary')?.getText();
+							const description = initializer
+								.getProperty('description')
+								?.getChildAtIndex(2)
+								?.getText();
+							// Check for existing JSDoc comments
+							const comments = propertyAssignment.getLeadingCommentRanges();
 
-					let existingComment = '';
-					let startPos = propertyAssignment?.getStart();
-					if (comments.length > 0) {
-						// Assuming the last comment is the relevant one
-						const lastComment = comments[comments.length - 1];
-						existingComment = sourceFile
-							.getFullText()
-							.substring(lastComment.getPos(), lastComment.getEnd());
+							let existingComment = '';
+							let startPos = propertyAssignment?.getStart();
+							if (comments.length > 0) {
+								// Assuming the last comment is the relevant one
+								const lastComment = comments[comments.length - 1];
+								existingComment = sourceFile
+									.getFullText()
+									.substring(lastComment.getPos(), lastComment.getEnd());
 
-						// Process the existing comment (example: log it)
-						console.log('Existing Comment:', existingComment);
+								// Process the existing comment (example: log it)
+								console.log('Existing Comment:', existingComment);
 
-						const commentStartPos = lastComment.getPos();
-						startPos = commentStartPos;
-						// Remove the existing comment
-						// lastComment.remove();
-						sourceFile.removeText(commentStartPos, lastComment.getEnd());
+								const commentStartPos = lastComment.getPos();
+								startPos = commentStartPos;
+								// Remove the existing comment
+								// lastComment.remove();
+								sourceFile.removeText(commentStartPos, lastComment.getEnd());
+							}
+
+							// Your logic to generate a new comment, possibly using existingComment data
+							const newJsDocComment = `/**\n * ${summary}\n *\n * @description\n * ${description}\n */`;
+
+							// Determine position for inserting the new JSDoc comment
+
+							// Insert the new JSDoc comment
+							sourceFile.insertText(startPos, newJsDocComment);
+						}
 					}
-
-					// Your logic to generate a new comment, possibly using existingComment data
-					const newJsDocComment = `/**\n * ${summary}\n *\n * @description\n * ${description}\n */`;
-
-					// Determine position for inserting the new JSDoc comment
-
-					// Insert the new JSDoc comment
-					sourceFile.insertText(startPos, newJsDocComment);
-				}
+				});
 			}
 		});
 		// sourceFile.forEachDescendant((node) => {
@@ -168,4 +173,4 @@ function createJSDocCommentFromTemplate(node: PropertyAssignment, template: stri
 }
 
 // Usage Example
-updateJSDocComments('utils/api/contracts/workerTask.ts', '/** {{summary}} - {{description}} */');
+updateJSDocComments('utils/api/contracts', '/** {{summary}} - {{description}} */');

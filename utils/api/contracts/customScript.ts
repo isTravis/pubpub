@@ -8,6 +8,13 @@ extendZodWithOpenApi(z);
 const c = initContract();
 
 export const customScriptContract = c.router({
+	/**
+	 * summary: 'Set a custom script'
+	 *
+	 * @description
+	 * 'Set a custom scripts, e.g. the CSS or JS (if you have access) for this community'
+	 */
+
 	set: {
 		path: '/api/customScripts',
 		method: 'POST',

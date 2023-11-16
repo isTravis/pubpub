@@ -14,6 +14,7 @@ import {
 	resourceASTSchema,
 	sanitizedPubSchema,
 } from '../schemas/pub';
+import { md } from '../utils/string';
 
 extendZodWithOpenApi(z);
 
@@ -30,8 +31,12 @@ export const pubContract = c.router({
 		path: '/api/pubs/:slugOrId',
 		method: 'GET',
 		summary: "Get a pub by it's slug or id",
-		description:
-			"Get a pub by it's slug or id.\n\n The slug is the thing after `/pub/` in the URL, but before `/release` or `/draft`.",
+		description: md`
+			    		Get a pub by it's slug or id.
+
+			    		The slug is the thing after \`/pub/\` in the URL, but before \`/release\` or \`/draft\`.
+
+		`,
 		pathParams: z.object({
 			slugOrId: z.string().openapi({
 				description:

@@ -7,9 +7,10 @@ import Cite from 'citation-js';
 import { DocJson } from 'types';
 import { getNotesByKindFromDoc, jsonToNode } from 'components/Editor';
 import { citationStyles, CitationStyleKind, CitationInlineStyleKind } from 'utils/citations';
-import { StructuredValue, RenderedStructuredValue } from 'utils/notes';
+import { StructuredValue } from 'utils/notes';
 import { expiringPromise } from 'utils/promises';
 import { CitationStyle, FacetValue } from 'facets';
+import pLimit from 'p-limit';
 
 /* Different styles available here: */
 /* https://github.com/citation-style-language/styles */
@@ -65,11 +66,25 @@ const getInlineCitation = (
 	return null;
 };
 
+const MAX_CONCURRENT_CITATIONS = 5 as const;
+
+// this limits the number of global concurrent async calls to 5
+// you can find the number of pending calls by doing `asyncCitationLimit.pendingCount`
+const asyncCitationLimit = pLimit(MAX_CONCURRENT_CITATIONS);
+
 const getSingleCitationAsync = expiringPromise(
-	async (structuredValue: string) => {
-		return Cite.async(structuredValue);
+	async (structuredValue: string): Promise<any> =>
+		asyncCitationLimit(async () => await Cite.async(structuredValue)),
+	{
+		// since we are mapping over all of the structured values at once and rely on p-limit to
+		// limit the concurrency, this timeout is timeout is best thought of
+		// as the max time we want to spend on fetching all citations
+		timeout: 10000,
+		throws: () => {
+			console.error('Citation data failed to load');
+			return new Error('Citation data failed to load');
+		},
 	},
-	{ timeout: 1000, throws: () => new Error('Citation data failed to load') },
 );
 
 const getSingleStructuredCitation = async (
@@ -112,40 +127,23 @@ const getSingleStructuredCitation = async (
 	}
 };
 
-function* iterStructuredValues(structuredValues: StructuredValue[], limit: number) {
-	let offset = 0;
-	while (true) {
-		const slice = structuredValues.slice(offset, offset + limit);
-		yield slice;
-		if (slice.length < limit) break;
-		offset += limit;
-	}
-}
-
 export const getStructuredCitations = async (
 	structuredValues: StructuredValue[],
 	citationStyle: CitationStyleKind = 'apa-7',
 	inlineStyle: CitationInlineStyleKind = 'count',
 ) => {
-	const structuredCitationsMap: Record<StructuredValue, RenderedStructuredValue> = {};
-	const renderedStructuredValues: RenderedStructuredValue[] = [];
-	// Some Pubs have many (100+) citations, so we batch the `Cite.async` calls
-	// to avoid timeouts.
-	for (const structuredValueSlice of iterStructuredValues(structuredValues, 10)) {
-		// eslint-disable-next-line no-await-in-loop
-		const renderedStructuredValuesSlice = await Promise.all(
-			structuredValueSlice.map((structuredValue) =>
-				getSingleStructuredCitation(structuredValue, citationStyle, inlineStyle),
-			),
-		);
-		for (const renderedStructuredValue of renderedStructuredValuesSlice) {
-			renderedStructuredValues.push(renderedStructuredValue);
-		}
-	}
-	structuredValues.forEach((structuredValue, index) => {
-		structuredCitationsMap[structuredValue] = renderedStructuredValues[index];
-	});
-	return structuredCitationsMap;
+	const renderedStructuredValues = await Promise.all(
+		structuredValues.map(async (structuredValue) => {
+			const renderedStructuredValue = await getSingleStructuredCitation(
+				structuredValue,
+				citationStyle,
+				inlineStyle,
+			);
+			return [structuredValue, renderedStructuredValue];
+		}),
+	);
+
+	return Object.fromEntries(renderedStructuredValues);
 };
 
 export const getStructuredCitationsForPub = (

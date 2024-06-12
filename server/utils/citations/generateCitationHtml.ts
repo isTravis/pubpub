@@ -100,9 +100,8 @@ export const generateCitationHtml = async (
 
 	/* Set the user agent with a mailto to use Crossref's "polite" pool. */
 	/* https://www.crossref.org/blog/rebalancing-our-rest-api-traffic/ */
-	Cite.util.setUserAgent(
-		'PubPub/6.0 (https://pubpub.org; mailto:dev@pubpub.org) Citation.js/0.7.11 Node.js/18.7.0',
-	);
+	// Cite.util.setUserAgent('PubPub/6.0 (https://pubpub.org; mailto:dev@pubpub.org) Node.js/18.7.0');
+	Cite.util.setUserAgent('x');
 
 	const pubCiteObject = await Cite.async({
 		...commonData,

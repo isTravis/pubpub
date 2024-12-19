@@ -353,7 +353,7 @@
 		"ts-morph": "^21.0.1",
 		"typescript": "^5.3.3",
 		"webpack": "^4.41.5",
-		"webpack-bundle-analyzer": "^3.1.0",
+		"webpack-bundle-analyzer": "^4.10.2",
 		"webpack-cli": "^3.3.1",
 		"webpack-manifest-plugin": "^2.0.4"
 	},

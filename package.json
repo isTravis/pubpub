@@ -220,7 +220,7 @@
 		"request": "^2.88.0",
 		"request-promise": "^4.2.4",
 		"rss": "^1.2.2",
-		"sanitize-html": "^2.3.2",
+		"sanitize-html": "^2.12.1",
 		"sass": "^1.57.1",
 		"sass-loader": "^7.1.0",
 		"sequelize": "^6.31.1",

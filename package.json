@@ -155,7 +155,7 @@
 		"jsonpath": "^1.1.0",
 		"jsonwebtoken": "^9.0.0",
 		"juice": "^8.0.0",
-		"katex": "^0.13.18",
+		"katex": "^0.16.10",
 		"keyboardjs": "^2.5.1",
 		"knex": "^2.4.0",
 		"linkify-html": "^3.0.5",

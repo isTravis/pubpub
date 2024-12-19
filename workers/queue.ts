@@ -11,7 +11,7 @@ import { WorkerTask } from 'server/models';
 import { expect } from 'utils/assert';
 import { createCachePurgeDebouncer } from 'utils/caching/createCachePurgeDebouncer';
 
-const maxWorkerTimeSeconds = 120;
+const maxWorkerTimeSeconds = 300;
 const maxWorkerThreads = 5;
 let currentWorkerThreads = 0;
 

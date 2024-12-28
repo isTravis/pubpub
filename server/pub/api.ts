@@ -13,7 +13,7 @@ import { generateDoi } from 'server/doi/queries';
 import { assert, expect } from 'utils/assert';
 import { prepareResource, submitResource } from 'deposit/datacite/deposit';
 import { assertValidResource } from 'deposit/validate';
-import { queryOne } from 'utils/query/queryOne';
+import { isUUID, queryOne } from 'utils/query/queryOne';
 import { queryMany } from 'utils/query/queryMany';
 import { createGetRequestIds } from 'utils/getRequestIds';
 import { contract } from 'utils/api/contract';
@@ -24,6 +24,7 @@ import { writeDocumentToPubDraft } from 'server/utils/firebaseTools';
 import { isDuqDuq, isProd } from 'utils/environment';
 import { ensureUserIsCommunityAdmin } from 'utils/ensureUserIsCommunityAdmin';
 import { omitKeys } from 'utils/objects';
+import { getPub } from 'server/utils/queryHelpers';
 import { Pub } from './model';
 
 import { canCreatePub, canDestroyPub, getUpdatablePubFields } from './permissions';
@@ -354,5 +355,53 @@ export const pubServer = s.router(contract.pub, {
 				};
 			},
 		},
+	},
+
+	discussions: async ({ params, req }) => {
+		const community = await ensureUserIsCommunityAdmin(req);
+
+		const isPubId = isUUID(params.slugOrPubId);
+
+		const pub = await getPub(
+			{
+				communityId: community.id,
+				...(isPubId ? { id: params.slugOrPubId } : { slug: params.slugOrPubId }),
+			},
+			{
+				getDiscussions: true,
+				getSubmissions: false,
+				getDraft: false,
+				getCollections: false,
+				getMembers: false,
+				getReviews: false,
+				getCommunity: false,
+				getExports: false,
+				getFacets: false,
+			},
+		);
+		if (!pub) {
+			throw new NotFoundError();
+		}
+
+		// we need to do this strange mapping to make ts-rest happy
+		// for some reason it does not recognize that certain fields are nullable
+		// unless i explicitly map them to null
+		const discussions = (pub.discussions ?? [])
+			.filter((d) => !!d)
+			.map((d) => ({
+				...d,
+				anchors:
+					d.anchors?.map((x) => ({
+						...x,
+						selection: x.selection ?? null,
+					})) ?? [],
+				commenter: d.commenter
+					? {
+							id: d.commenter.id,
+							name: d.commenter.name ?? '',
+					  }
+					: null,
+			}));
+		return { status: 200, body: discussions };
 	},
 });

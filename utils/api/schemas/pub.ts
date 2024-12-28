@@ -6,7 +6,7 @@ import { Pub } from 'server/models';
 
 import { getProposedMetadata } from 'workers/tasks/import/metadata';
 import { pubAttributionSchema } from './pubAttribution';
-import { discussionSchema } from './discussion';
+import { baseDiscussionSchema } from './discussion';
 import { collectionPubSchema } from './collectionPub';
 import { collectionSchema } from './collection';
 import { collectionAttributionSchema } from './collectionAttribution';
@@ -146,18 +146,18 @@ export const getManyQuerySchema = z.object({
 			z.union([
 				z.object({
 					collectionIds: z.array(z.string().uuid()),
-					pubIds: z.undefined().optional(),
+					withinPubIds: z.undefined().optional(),
 				}),
 				z.object({
-					pubIds: z.array(z.string().uuid()),
+					withinPubIds: z.array(z.string().uuid()),
 					collectionIds: z.undefined().optional(),
 				}),
 				z.object({
-					pubIds: z.undefined().optional(),
+					withinPubIds: z.undefined().optional(),
 					collectionIds: z.undefined().optional(),
 				}),
 			]),
-		) satisfies z.ZodType<types.GetManyQuery>,
+		) satisfies z.ZodType<types.ManyRequestParams['query']>,
 	alreadyFetchedPubIds: z.array(z.string()),
 	pubOptions: z.object({
 		isAuth: z.boolean().optional(),
@@ -185,7 +185,7 @@ export const getManyQuerySchema = z.object({
 export const sanitizedPubSchema = pubSchema.merge(
 	z.object({
 		attributions: pubAttributionSchema.array(),
-		discussions: z.array(discussionSchema),
+		discussions: z.array(baseDiscussionSchema),
 		collectionPubs: z.array(
 			collectionPubSchema.merge(
 				z.object({
@@ -235,7 +235,7 @@ export const pubWithRelationsSchema = pubSchema.extend({
 	collectionPubs: collectionPubSchema.array().optional(),
 	community: communitySchema.optional(),
 	draft: draftSchema.optional(),
-	discussions: discussionSchema.array().optional(),
+	discussions: baseDiscussionSchema.array().optional(),
 	members: memberSchema.array().optional(),
 	releases: releaseSchema.array().optional(),
 	inboundEdges: pubEdgeSchema.array().optional(),

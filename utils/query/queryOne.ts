@@ -9,7 +9,7 @@ import type { Express, Response } from 'express-serve-static-core';
 import { createIncludes } from './include';
 import { CustomScopeInput, createCustomWhereClause } from './queryMany';
 
-const isUUID = (slugOrId: string) => z.string().uuid().safeParse(slugOrId).success;
+export const isUUID = (slugOrId: string) => z.string().uuid().safeParse(slugOrId).success;
 
 export const queryOne =
 	<M extends ModelCtor>(

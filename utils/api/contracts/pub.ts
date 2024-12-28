@@ -26,6 +26,7 @@ import {
 import { docJsonSchema } from '../schemas/release';
 import { sourceFileSchema } from '../schemas/import';
 import { Metadata } from '../utils/metadataType';
+import { discussionSchema } from '../schemas/discussion';
 
 extendZodWithOpenApi(z);
 
@@ -231,6 +232,7 @@ export const pubRouter = {
 		}),
 		query: createGetQueryOptions(pubWithRelationsSchema, {
 			include: {
+				// @ts-expect-error
 				options: [
 					'attributions',
 					'collectionPubs',
@@ -242,6 +244,9 @@ export const pubRouter = {
 					'submission',
 					'inboundEdges',
 					'outboundEdges',
+					'discussions',
+					'discussions.thread',
+					'discussions.thread.comments',
 				],
 				defaults: ['attributions', 'draft'],
 			},
@@ -284,6 +289,7 @@ export const pubRouter = {
 					'submission',
 					'inboundEdges',
 					'outboundEdges',
+					'discussions',
 				],
 				defaults: ['attributions', 'draft'],
 			},
@@ -459,6 +465,19 @@ export const pubRouter = {
 	},
 	/** Methods for working with the text of a pub */
 	text: textRouter as TextRouter,
+
+	discussions: {
+		path: '/api/pubs/:slugOrPubId/discussions',
+		method: 'GET',
+		summary: 'Get discussions for a pub',
+		description: 'Get discussions for a pub',
+		pathParams: z.object({
+			slugOrPubId: z.string(),
+		}),
+		responses: {
+			200: z.array(discussionSchema),
+		},
+	},
 } as const satisfies AppRouter;
 
 type PubRouterType = typeof pubRouter;

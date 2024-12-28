@@ -8,6 +8,7 @@ import { createPubExportsForLatestRelease } from 'server/export/queries';
 import { getPubData } from 'server/rss/queries';
 
 import { promptOkay } from './utils/prompt';
+import { asyncMap } from '../utils/async';
 
 /* Usage: npm run tools exportCollection -- --collectionId=collectionId */
 
@@ -20,28 +21,34 @@ const {
 
 const getPubExports = async (pubId, dest) => {
 	const [pubData] = await getPubData([pubId]);
+	if (!pubData.releases || pubData.releases.length < 1) {
+		return Promise.resolve();
+	}
 	const pdfUrl = getBestDownloadUrl(pubData, 'pdf');
 	const jatsUrl = getBestDownloadUrl(pubData, 'jats');
 	const finalDest = `${dest}/${pubData.slug}`;
-
+	const promises = [];
 	if (!pdfUrl || !jatsUrl) {
 		console.log('Missing:', pubData.slug);
-		await createPubExportsForLatestRelease(pubId);
-		await getPubExports(pubId, dest);
-	} else {
-		fs.mkdirSync(finalDest);
-		if (jatsUrl) {
-			await fetch(jatsUrl).then((res) => {
-				res.body.pipe(fs.createWriteStream(`${finalDest}/${pubData.slug}.xml`));
-			});
-		}
-		if (pdfUrl) {
-			await fetch(pdfUrl).then((res) => {
-				res.body.pipe(fs.createWriteStream(`${finalDest}/${pubData.slug}.pdf`));
-			});
-		}
+		promises.push(createPubExportsForLatestRelease(pubId));
+		promises.push(getPubExports(pubId, dest));
+		console.log('resolve recursive call', promises);
+		return Promise.all(promises);
 	}
-	return Promise.resolve();
+	// Make the empty dir
+	fs.mkdirSync(finalDest);
+	try {
+		const jats = await fetch(jatsUrl);
+		console.log('getting JATS...', jatsUrl);
+		jats.body.pipe(fs.createWriteStream(`${finalDest}/${pubData.slug}.xml`));
+		const pdf = await fetch(pdfUrl);
+		console.log('getting PDF...', pdfUrl);
+		pdf.body.pipe(fs.createWriteStream(`${finalDest}/${pubData.slug}.pdf`));
+		console.log('resolving promise...');
+		return Promise.resolve();
+	} catch (error) {
+		throw new Error(error);
+	}
 };
 
 const main = async () => {
@@ -66,10 +73,10 @@ const main = async () => {
 			fs.rmdirSync(dest, { recursive: true });
 		}
 		fs.mkdirSync(dest);
-		await Promise.all(
-			collection.collectionPubs.map((collectionPub) =>
-				getPubExports(collectionPub.pubId, dest),
-			),
+		await asyncMap(
+			collection.collectionPubs,
+			(collectionPub) => getPubExports(collectionPub.pubId, dest),
+			{ concurrency: 5 },
 		);
 	} catch (err) {
 		console.warn(err);

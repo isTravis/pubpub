@@ -1,4 +1,3 @@
-import { Community } from 'server/models';
 import { getScope } from 'server/utils/queryHelpers';
 
 import { expect } from 'utils/assert';
@@ -37,15 +36,12 @@ export const canCreatePub = async ({
 			return { create: false };
 		}
 
-		const [scopeData, communityData] = await Promise.all([
-			getScope({ communityId, collectionId, loginId: userId }),
-			Community.findOne({ where: { id: communityId }, attributes: ['hideCreatePubButton'] }),
-		]);
+		const scopeData = await getScope({ communityId, collectionId, loginId: userId });
 
 		const {
 			activePermissions: { canManage },
 		} = scopeData;
-		const { hideCreatePubButton } = expect(communityData);
+		const { hideCreatePubButton } = expect(scopeData.elements.activeCommunity);
 
 		return {
 			create: canManage || !hideCreatePubButton,

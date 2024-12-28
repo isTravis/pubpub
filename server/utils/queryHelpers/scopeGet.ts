@@ -167,22 +167,18 @@ const getScopeElements = async (scopeInputs: {
 		activeTargetType = 'collection';
 	}
 
-	if (!activeCommunity && communityId) {
-		activeCommunity = expect(
-			await Community.findOne({
-				where: { id: communityId },
-			}),
-		);
-	}
-
 	if (activeTargetType === 'pub') {
 		activePub = await Pub.findOne({
 			where: stripFalsyIdsFromQuery({
-				communityId: activeCommunity && activeCommunity.id,
+				communityId: communityId ?? null,
 				slug: pubSlug,
 				id: pubId,
 			}),
 			include: [
+				{
+					model: Community,
+					as: 'community',
+				},
 				{
 					model: CollectionPub,
 					as: 'collectionPubs',
@@ -191,7 +187,7 @@ const getScopeElements = async (scopeInputs: {
 						{
 							model: Collection,
 							as: 'collection',
-							attributes: ['kind', 'isPublic'],
+							// attributes: ['kind', 'isPublic', 'slug'],
 						},
 					],
 				},
@@ -207,15 +203,15 @@ const getScopeElements = async (scopeInputs: {
 				},
 			],
 		});
+
 		activeTarget = activePub;
 		if (!activePub) {
 			throw new Error('Pub Not Found');
 		}
-		const collections = await Collection.findAll({
-			where: {
-				id: { [Op.in]: (activePub.collectionPubs || []).map((cp) => cp.collectionId) },
-			},
-		});
+
+		activeCommunity = activePub.community || null;
+		const collections = activePub.collectionPubs!.map((cp) => cp.collection!);
+
 		inactiveCollections = collections.filter((collection) => {
 			const isActive = collection.slug === collectionSlug;
 			if (isActive) {
@@ -229,16 +225,26 @@ const getScopeElements = async (scopeInputs: {
 		activeCollection = await getCollection({
 			collectionSlug,
 			collectionId,
-			communityId: activeCommunity?.id,
+			includeCommunity: true,
+			communityId: communityId ?? null,
 		});
 
 		activeTarget = activeCollection;
+		activeCommunity = activeCollection?.community!;
 	}
 
-	if (!activeCommunity && activeTarget) {
-		activeCommunity = await Community.findOne({
-			where: { id: expect(activeTarget.communityId) },
-		});
+	if (!activeCommunity || activeCommunity.id !== communityId) {
+		if (communityId) {
+			activeCommunity = await Community.findOne({
+				where: {
+					id: communityId,
+				},
+			});
+		} else if (activeTarget) {
+			activeCommunity = await Community.findOne({
+				where: { id: expect(activeTarget.communityId) },
+			});
+		}
 	}
 
 	if (activeTargetType === 'community') {
@@ -468,14 +474,20 @@ type ScopeInputs = {
 /* When called from an API endpoint, it is likely that collectionId and pubId will be used. */
 const scopeGet = async (scopeInputs: ScopeInputs): Promise<types.ScopeData> => {
 	const scopeElements = await getScopeElements(scopeInputs);
-	const facets = await getFacets(!!scopeInputs.includeFacets, scopeElements);
 
-	const publicPermissionsData = await getPublicPermissionsData(scopeElements);
-	const scopeMemberData = await getScopeMemberData(scopeInputs, scopeElements);
-	const [activePermissions, activeCounts] = await Promise.all([
-		getActivePermissions(scopeInputs, scopeElements, publicPermissionsData, scopeMemberData),
+	const [facets, publicPermissionsData, scopeMemberData, activeCounts] = await Promise.all([
+		getFacets(!!scopeInputs.includeFacets, scopeElements),
+		getPublicPermissionsData(scopeElements),
+		getScopeMemberData(scopeInputs, scopeElements),
 		getActiveCounts(!!scopeInputs.isDashboard, scopeElements),
 	]);
+
+	const activePermissions = await getActivePermissions(
+		scopeInputs,
+		scopeElements,
+		publicPermissionsData,
+		scopeMemberData,
+	);
 
 	return {
 		elements: scopeElements,
